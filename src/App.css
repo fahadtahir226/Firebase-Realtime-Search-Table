@@ -1,0 +1,50 @@
+/* .App {
+  text-align: center;
+} */
+html {
+  scroll-behavior: smooth
+}
+
+.App-logo {
+  height: 10vmin;
+  pointer-events: none;
+}
+.fa-google {
+  background: conic-gradient(from -45deg, #ea4335 110deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg) 73% 55%/150% 150% no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.tab a.active {
+  color: #00bfa5 !important;
+}
+
+.indicator {
+  background-color:#00bfa5 !important;
+}
+
+#recordResult .select-dropdown {
+  text-align: center;
+}
+
+#myTable td{
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
