@@ -17,9 +17,9 @@ function DefaultColumnFilter({
       value={filterValue || ''}
       onChange={e => {
         setFilter(e.target.value || undefined) // Set undefined to remove the filter entirely
-        document.getElementById('myPager').innerHTML = ''
-        $('#myUserTable').pageMe({
-          pagerSelector:'#myPager',
+        document.getElementById('myTPager').innerHTML = ''
+        $('#myTranTable').pageMe({
+          pagerSelector:'#myTPager',
           activeColor: 'green',
           prevText:'Anterior',
           nextText:'Siguiente',
@@ -153,7 +153,7 @@ fuzzyTextFilterFn.autoRemove = val => !val
 
 
 
-const Users = () => {
+const Transactions = () => {
   const [status, setStatus] = useState(false);
 
   const [data, setdata] = useState([{user_id: '-', phoneNumber: '-', registrationDate: '-', state: '-', }]);
@@ -256,23 +256,27 @@ const Users = () => {
 	};
 	useEffect(() => {
     let records = []; 
-    RDB.ref('Users').once('value')
+    RDB.ref('Transactions').once('value')
     .then( res => {
       let entries = res.val();
       Object.keys(entries).forEach(key =>{
         records.push({ 
-          user_id: entries[key].user_id,
+          name: entries[key].name,
+          amount: entries[key].amount,
+          discountedAmount: entries[key].discountedAmount,
+          orderDate: entries[key].orderDate,
+          paymentMethod: entries[key].paymentMethod,
           phoneNumber: entries[key].phoneNumber,
-          registrationDate: entries[key].registrationDate,
-          state: entries[key].state
+          status: entries[key].status,
+          key,
         })
       }
         )
         setStatus(true);
         setdata(records)
-        document.getElementById('myPager').innerHTML = ''
-        $('#myUserTable').pageMe({
-          pagerSelector:'#myPager',
+        document.getElementById('myTPager').innerHTML = ''
+        $('#myTranTable').pageMe({
+          pagerSelector:'#myTPager',
           activeColor: 'green',
           prevText:'Anterior',
           nextText:'Siguiente',
@@ -314,7 +318,7 @@ const Users = () => {
 	}
 	const exportTableToCSV = filename => {
     var csv = [];
-    var rows = document.querySelectorAll("#myUserTable tr");
+    var rows = document.querySelectorAll("#myTranTable tr");
     
     for (var i = 0; i < rows.length; i++) {
       var row = [], cols = rows[i].querySelectorAll("td, th");  
@@ -345,10 +349,14 @@ const Users = () => {
   // const dispatch = useDispatch();
   
   const columns = React.useMemo(() => [
-      { Header: 'User Id', accessor: 'user_id' }, // accessor is the "key" in the data
+      { Header: 'Name', accessor: 'name' },
+      { Header: 'Amount', accessor: 'amount' },
+      { Header: 'Discounted Amount', accessor: 'discountedAmount'},
+      { Header: 'Order Date', accessor: 'orderDate', Filter: DateFilter },
+      { Header: 'Payment Method', accessor: 'paymentMethod' },
       { Header: 'Phone Number', accessor: 'phoneNumber' },
-      { Header: 'Date', accessor: 'registrationDate', Filter: DateFilter },
-      { Header: 'State', accessor: 'state'}
+      { Header: 'Status', accessor: 'status'},
+      { Header: '', accessor: 'key'}
     ],[])  
   const { 
     getTableProps,
@@ -374,21 +382,73 @@ const Users = () => {
 			  			</button>
 			  		</div>
 			  	</div>
-          <table {...getTableProps()} id="myUserTable" style={{overflow: 'scroll'}} >
+          <table {...getTableProps()} id="myTranTable" style={{overflow: 'scroll'}} >
             <thead>
               {headerGroups.map(headerGroup => (
                 <tr {...headerGroup.getHeaderGroupProps()} >
-                  {headerGroup.headers.map(column => (
+                  {/* {headerGroup.headers.map(column => (
                  <th {...column.getHeaderProps(
                   //  column.getSortByToggleProps()
-                   )}>
-                      {column.render('Header')}
-                     <span>
-                       {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
-                     </span>
-                     <div>{column.canFilter ? column.render('Filter') : null}</div>
+                  )}>{column.render('Header')}
+                    <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''} </span>
+                    <div>{column.canFilter ? column.render('Filter') : null}</div>
+                  </th>
+                  ))} */}
+                  {headerGroup.headers.length ?
+                  <>
+                    <th {...headerGroup.headers[0].getHeaderProps(
+                    // headerGroup.headers[0].getSortByToggleProps()
+                     )}> {headerGroup.headers[0].render('Header')}
+                      <span> {headerGroup.headers[0].isSorted ? (headerGroup.headers[0].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      <div>{headerGroup.headers[0].canFilter ? headerGroup.headers[0].render('Filter') : null}</div>
                     </th>
-                  ))}
+                    <th {...headerGroup.headers[1].getHeaderProps(
+                    // headerGroup.headers[1].getSortByToggleProps()
+                     )}> {headerGroup.headers[1].render('Header')}
+                      <span> {headerGroup.headers[1].isSorted ? (headerGroup.headers[1].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      <div>{headerGroup.headers[1].canFilter ? headerGroup.headers[1].render('Filter') : null}</div>
+                    </th>
+                    <th {...headerGroup.headers[2].getHeaderProps(
+                    // headerGroup.headers[2].getSortByToggleProps()
+                     )}> {headerGroup.headers[2].render('Header')}
+                      <span> {headerGroup.headers[2].isSorted ? (headerGroup.headers[2].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      <div>{headerGroup.headers[2].canFilter ? headerGroup.headers[2].render('Filter') : null}</div>
+                    </th>
+                    <th {...headerGroup.headers[3].getHeaderProps(
+                    // headerGroup.headers[3].getSortByToggleProps()
+                     )}> {headerGroup.headers[3].render('Header')}
+                      <span> {headerGroup.headers[3].isSorted ? (headerGroup.headers[3].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      <div>{headerGroup.headers[3].canFilter ? headerGroup.headers[3].render('Filter') : null}</div>
+                    </th>
+                    <th colSpan='2' {...headerGroup.headers[4].getHeaderProps(
+                    // headerGroup.headers[4].getSortByToggleProps()
+                     )}> {headerGroup.headers[4].render('Header')}
+                      <span> {headerGroup.headers[4].isSorted ? (headerGroup.headers[4].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      <div>{headerGroup.headers[4].canFilter ? headerGroup.headers[4].render('Filter') : null}</div>
+                    </th>
+                    <th></th>
+                    <th {...headerGroup.headers[5].getHeaderProps(
+                    // headerGroup.headers[5].getSortByToggleProps()
+                     )}> {headerGroup.headers[5].render('Header')}
+                      <span> {headerGroup.headers[5].isSorted ? (headerGroup.headers[5].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      <div>{headerGroup.headers[5].canFilter ? headerGroup.headers[5].render('Filter') : null}</div>
+                    </th>
+                    <th {...headerGroup.headers[6].getHeaderProps(
+                    // headerGroup.headers[6].getSortByToggleProps()
+                     )}> 
+                     {/* {headerGroup.headers[6].render('Header')} */}
+                      {/* <span> {headerGroup.headers[6].isSorted ? (headerGroup.headers[6].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span> */}
+                      {/* <div>{headerGroup.headers[6].canFilter ? headerGroup.headers[6].render('Filter') : null}</div> */}
+                    </th>
+                    <th {...headerGroup.headers[7].getHeaderProps(
+                    // headerGroup.headers[5].getSortByToggleProps()
+                     )}> 
+                     {/* {headerGroup.headers[5].render('Header')} */}
+                      {/* <span> {headerGroup.headers[5].isSorted ? (headerGroup.headers[5].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span> */}
+                      {/* <div>{headerGroup.headers[5].canFilter ? headerGroup.headers[5].render('Filter') : null}</div> */}
+                    </th>
+                  </>
+                  : null}
                 </tr>
               ))}
             </thead>
@@ -404,21 +464,33 @@ const Users = () => {
                     >
                       <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
                       <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
-                      <td {...row.cells[2].getCellProps()}>
-                        {row.cells[2].value === '-' ? row.cells[2].render('Cell') : new Date(parseInt(row.cells[2].value)).toLocaleDateString()}
+                      <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>      
+                      <td {...row.cells[3].getCellProps()}>
+                        {row.cells[3].value ? new Date(parseInt(row.cells[3].value)).toLocaleDateString() : ''}
                       </td>
-                      <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>      
+                      <td colSpan='2' {...row.cells[4].getCellProps()}>{row.cells[4].render('Cell')}</td>
+                      <td {...row.cells[5].getCellProps()}>{row.cells[5].render('Cell')}</td>
+                      <td {...row.cells[6].getCellProps()}>
+                        {row.cells[6].value ? 
+                          <i style={{color: 'green'}} className='material-icons'>check_circle</i> : 
+                          <i style={{color: 'red'}} className='material-icons'>close</i>
+                        }
+                      </td>
+                      <td {...row.cells[7].getCellProps()}>
+                        <i className='material-icons' onClick={()=>console.log(row.cells[7]) } >delete</i>
+                      </td>
                   </tr>
                 )}
               )}
             </tbody>
           </table>
+          
           <div className="col m12 center">
-            <ul className="pagination pager" id="myPager"></ul>
+            <ul className="pagination pager" id="myTPager"></ul>
           </div>
         </div>
       </div>
     )
   }
 
-  export default Users
+  export default Transactions

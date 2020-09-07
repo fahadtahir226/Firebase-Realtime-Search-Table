@@ -5,7 +5,7 @@ import { useTable, useSortBy } from 'react-table'
 import { useDispatch } from 'react-redux';
 import { newCurrentUserInfo } from '../../../../../Actions/index'
 
-const QueryResults = () => {
+const QueryResults = async () => {
   $.fn.pageMe = function(opts){
     var $this = this,
         defaults = {
@@ -154,20 +154,24 @@ const QueryResults = () => {
     // Download CSV file
     downloadCSV(csv.join("\n"), filename);
   }
-  const dispatch = useDispatch()
-  const data = useSelector(state => state.userDetail)
+  const data = await db.ref('Users').on('value').then(res => res.val())
   const columns = React.useMemo(() => [
-      { Header: 'User Name', accessor: 'u_ig_username' }, // accessor is the "key" in the data
-      { Header: 'Full Name', accessor: 'u_ig_fullname' },
-      { Header: 'Email', accessor: 'u_email' },
-      { Header: 'Follower', accessor: 'u_ig_followers_count' },
-      { Header: 'Following', accessor: 'u_ig_following_count' },
-      { Header: 'Category', accessor: 'u_ig_category'},
-      { Header: 'Bio', accessor: 'u_ig_bio' },
+      { Header: 'User Name', accessor: 'user_id' }, // accessor is the "key" in the data
+      { Header: 'Phone Number', accessor: 'phoneNumber' },
+      { Header: 'Date', accessor: 'registrationDate' },
     ],
     []
   )  
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({ data, columns }, useSortBy )
+  const { 
+    getTableProps,
+    getTableBodyProps, 
+    prepareRow, 
+    rows, 
+    state, 
+    headerGroups, 
+    visibleColumns, 
+    setGlobalFilter,
+    preGlobalFilteredRows } = useTable({ data, columns, defaultColumn, filterTypes }, useSortBy, useFilters, useGlobalFilter )
   
     return (
       <>

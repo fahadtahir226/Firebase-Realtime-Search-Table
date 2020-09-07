@@ -15,8 +15,8 @@ const Navbar = () => {
         <div className="nav-wrapper white" style={{marginBottom: 0,}}>
           <a href="#!" className="brand-logo hide-on-med-and-down black-text"><img alt="" style={{padding: 10}} src={logo} /></a>
           <ul id="nav" className="tabs tabs-transparent" style={{height: 64}}>
-            <li style={{ height: 64 }} className="tab right"><a href="#queries" style={{paddingTop: 10, color: 'black', background: 'white'}} >queries</a></li>
-            <li style={{ height: 64 }} className="tab right"><a href="#users" className="active" style={{paddingTop: 10, color: 'black', background: 'white'}} >users</a></li>
+            <li style={{ height: 64 }} className="tab right"><a href="#transactions" style={{paddingTop: 10, color: 'black', background: 'white'}} >Transactions</a></li>
+            <li style={{ height: 64 }} className="tab right"><a href="#users" className="active" style={{paddingTop: 10, color: 'black', background: 'white'}} >Users</a></li>
           </ul>
         </div>
       </nav>

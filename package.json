@@ -11,14 +11,13 @@
     "firebase": "^7.17.1",
     "firebase-tools": "^8.6.0",
     "jquery": "^3.5.1",
+    "match-sorter": "^4.2.0",
     "materialize-css": "^1.0.0-rc.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-redux": "^7.2.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
-    "react-table": "^7.5.0",
-    "redux": "^4.0.5"
+    "react-table": "^7.5.0"
   },
   "scripts": {
     "start": "react-scripts start",

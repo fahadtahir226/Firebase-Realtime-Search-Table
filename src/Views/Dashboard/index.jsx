@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 // import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import Navbar from './Components/NavBar/Navbar';
-import Queries from './Components/Queries';
+import Transactions from './Components/Transactions';
 import Users from './Components/Users';
 
 class Dashboard extends Component {
@@ -13,8 +13,8 @@ class Dashboard extends Component {
           <div id="users" style={{padding: 10}}>
             <Users />
           </div>
-          <div id="queries"  style={{padding: 10}}>
-            <Queries />
+          <div id="transactions"  style={{padding: 10}}>
+            <Transactions />
           </div>
         </div>
       </div>
