@@ -37,26 +37,18 @@ function DateFilter({
   column: { filterValue = undefined, preFilteredRows, setFilter },
 }) {
   // const count = preFilteredRows.length
-  var elems = document.querySelectorAll('.datepicker'); 
+  var elems = document.querySelectorAll('.userdatepicker'); 
   M.Datepicker.init(elems, {
-    onSelect: date => 
-    // setFilter(date.getTime() || undefined )
-    setFilter(value => value === 'clear' ? undefined : [date.setHours(0, 0, 0, 0) , date.getTime() + 86399999]), // 86400000 is milliseconds in one day 
-    onClose: () => setFilter('clear')
-    
-    , // Set undefined to remove the filter entirely
+    onSelect: date => setFilter(date.toLocaleDateString() || undefined ),
+    onClose: () => setFilter(''),
     showClearBtn: true
   });
 
   return (
     <input
-      className='datepicker'
+      className='userdatepicker'
       type='text'
-      defaultValue={ filterValue ? new Date(filterValue[0]).toLocaleDateString() : ''}
-      // onChange={e => {
-      //   console.log("Consoling a value", e.target.value);
-      //   setFilter(e.target.value || undefined) // Set undefined to remove the filter entirely
-      // }}
+      defaultValue={ filterValue || '' }
       placeholder='Date'
     />
   )
@@ -263,7 +255,7 @@ const Users = () => {
         records.push({ 
           user_id: entries[key].user_id,
           phoneNumber: entries[key].phoneNumber,
-          registrationDate: entries[key].registrationDate,
+          registrationDate: new Date(entries[key].registrationDate).toLocaleDateString(),
           state: entries[key].state
         })
       }
@@ -394,20 +386,14 @@ const Users = () => {
             </thead>
                 
             <tbody {...getTableBodyProps()}>
-              {rows.map(
-                (row, i) => {
-                  prepareRow(row);
-                  // console.log(row.);
-                  return (
-                    <tr {...row.getRowProps()}  
-                      // onClick={() => dispatch(replaceQuery(row.original))}
-                    >
-                      <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
-                      <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
-                      <td {...row.cells[2].getCellProps()}>
-                        {row.cells[2].value === '-' ? row.cells[2].render('Cell') : new Date(parseInt(row.cells[2].value)).toLocaleDateString()}
-                      </td>
-                      <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>      
+              {rows.map((row, i) => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()}>
+                    <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
+                    <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
+                    <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>
+                    <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>      
                   </tr>
                 )}
               )}

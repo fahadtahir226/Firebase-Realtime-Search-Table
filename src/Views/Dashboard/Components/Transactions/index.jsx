@@ -37,11 +37,21 @@ function DateFilter({
   column: { filterValue = undefined, preFilteredRows, setFilter },
 }) {
   // const count = preFilteredRows.length
-  var elems = document.querySelectorAll('.datepicker'); 
+  var elems = document.querySelectorAll('.trandatepicker'); 
   M.Datepicker.init(elems, {
-    onSelect: date => 
-    // setFilter(date.getTime() || undefined )
-    setFilter(value => value === 'clear' ? undefined : [date.setHours(0, 0, 0, 0) , date.getTime() + 86399999]), // 86400000 is milliseconds in one day 
+    onSelect: date => {
+      setFilter(date.toLocaleDateString() || undefined )
+      document.getElementById('myTPager').innerHTML = ''
+      $('#myTranTable').pageMe({
+        pagerSelector:'#myTPager',
+        activeColor: 'green',
+        prevText:'Anterior',
+        nextText:'Siguiente',
+        showPrevNext:true,
+        hidePageNumbers:false,
+        perPage:50
+      });
+    },
     onClose: () => setFilter('clear')
     
     , // Set undefined to remove the filter entirely
@@ -50,18 +60,15 @@ function DateFilter({
 
   return (
     <input
-      className='datepicker'
+      className='trandatepicker'
       type='text'
-      defaultValue={ filterValue ? new Date(filterValue[0]).toLocaleDateString() : ''}
-      // onChange={e => {
-      //   console.log("Consoling a value", e.target.value);
-      //   setFilter(e.target.value || undefined) // Set undefined to remove the filter entirely
-      // }}
+      defaultValue={ filterValue || ''}
       placeholder='Date'
     />
   )
 }
 
+DateFilter.autoRemove = val => !val
 // This is a custom filter UI for selecting
 // a unique option from a list
 function SelectColumnFilter({
@@ -264,7 +271,7 @@ const Transactions = () => {
           name: entries[key].name,
           amount: entries[key].amount,
           discountedAmount: entries[key].discountedAmount,
-          orderDate: entries[key].orderDate,
+          orderDate: new Date(entries[key].orderDate).toLocaleDateString(),
           paymentMethod: entries[key].paymentMethod,
           phoneNumber: entries[key].phoneNumber,
           status: entries[key].status,
@@ -350,10 +357,10 @@ const Transactions = () => {
   
   const columns = React.useMemo(() => [
       { Header: 'Name', accessor: 'name' },
-      { Header: 'Amount', accessor: 'amount' },
-      { Header: 'Discounted Amount', accessor: 'discountedAmount'},
+      { Header: 'Amount', accessor: 'amount', },
+      { Header: 'Discounted', accessor: 'discountedAmount'},
       { Header: 'Order Date', accessor: 'orderDate', Filter: DateFilter },
-      { Header: 'Payment Method', accessor: 'paymentMethod' },
+      { Header: 'Payment', accessor: 'paymentMethod' },
       { Header: 'Phone Number', accessor: 'phoneNumber' },
       { Header: 'Status', accessor: 'status'},
       { Header: '', accessor: 'key'}
@@ -433,20 +440,8 @@ const Transactions = () => {
                       <span> {headerGroup.headers[5].isSorted ? (headerGroup.headers[5].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       <div>{headerGroup.headers[5].canFilter ? headerGroup.headers[5].render('Filter') : null}</div>
                     </th>
-                    <th {...headerGroup.headers[6].getHeaderProps(
-                    // headerGroup.headers[6].getSortByToggleProps()
-                     )}> 
-                     {/* {headerGroup.headers[6].render('Header')} */}
-                      {/* <span> {headerGroup.headers[6].isSorted ? (headerGroup.headers[6].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span> */}
-                      {/* <div>{headerGroup.headers[6].canFilter ? headerGroup.headers[6].render('Filter') : null}</div> */}
-                    </th>
-                    <th {...headerGroup.headers[7].getHeaderProps(
-                    // headerGroup.headers[5].getSortByToggleProps()
-                     )}> 
-                     {/* {headerGroup.headers[5].render('Header')} */}
-                      {/* <span> {headerGroup.headers[5].isSorted ? (headerGroup.headers[5].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span> */}
-                      {/* <div>{headerGroup.headers[5].canFilter ? headerGroup.headers[5].render('Filter') : null}</div> */}
-                    </th>
+                    <th></th>
+                    <th></th>
                   </>
                   : null}
                 </tr>
@@ -465,9 +460,10 @@ const Transactions = () => {
                       <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
                       <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
                       <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>      
-                      <td {...row.cells[3].getCellProps()}>
+                      <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>      
+                      {/* <td {...row.cells[3].getCellProps()}>
                         {row.cells[3].value ? new Date(parseInt(row.cells[3].value)).toLocaleDateString() : ''}
-                      </td>
+                      </td> */}
                       <td colSpan='2' {...row.cells[4].getCellProps()}>{row.cells[4].render('Cell')}</td>
                       <td {...row.cells[5].getCellProps()}>{row.cells[5].render('Cell')}</td>
                       <td {...row.cells[6].getCellProps()}>
