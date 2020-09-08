@@ -39,9 +39,23 @@ function DateFilter({
   // const count = preFilteredRows.length
   var elems = document.querySelectorAll('.userdatepicker'); 
   M.Datepicker.init(elems, {
+    maxDate: new Date(),
     onSelect: date => setFilter(date.toLocaleDateString() || undefined ),
-    onClose: () => setFilter(''),
-    showClearBtn: true
+    onClose: () => {
+      setFilter(undefined)
+      // document.getElementById('myPager').innerHTML = ''
+      // $('#myUserTable').pageMe({
+      //   pagerSelector:'#myPager',
+      //   activeColor: 'green',
+      //   prevText:'Anterior',
+      //   nextText:'Siguiente',
+      //   showPrevNext:true,
+      //   hidePageNumbers:false,
+      //   perPage:50
+      // });
+
+    return null
+  },
   });
 
   return (
@@ -53,6 +67,9 @@ function DateFilter({
     />
   )
 }
+
+DateFilter.autoRemove = val => !val
+
 
 // This is a custom filter UI for selecting
 // a unique option from a list
@@ -366,7 +383,7 @@ const Users = () => {
 			  			</button>
 			  		</div>
 			  	</div>
-          <table {...getTableProps()} id="myUserTable" style={{overflow: 'scroll'}} >
+          <table className='responsive-table highlight' {...getTableProps()} id="myUserTable" style={{overflow: 'scroll'}} >
             <thead>
               {headerGroups.map(headerGroup => (
                 <tr {...headerGroup.getHeaderGroupProps()} >
@@ -389,7 +406,8 @@ const Users = () => {
               {rows.map((row, i) => {
                 prepareRow(row);
                 return (
-                  <tr {...row.getRowProps()}>
+                  <tr {...row.getRowProps()} >
+                    {console.log(row)}
                     <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
                     <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
                     <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>

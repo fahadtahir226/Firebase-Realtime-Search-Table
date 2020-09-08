@@ -3,7 +3,7 @@ import $ from 'jquery'
 import M from 'materialize-css'
 import { RDB } from '../../../../Firebase/database'
 // import { useSelector } from 'react-redux';
-import { useTable, useFilters, useSortBy, useGlobalFilter } from 'react-table'
+import { useTable, useFilters, useSortBy, useGlobalFilter, autoResetFilters } from 'react-table'
 import matchSorter from 'match-sorter'
 
 // Define a default UI for filtering
@@ -34,7 +34,7 @@ function DefaultColumnFilter({
 }
 
 function DateFilter({
-  column: { filterValue = undefined, preFilteredRows, setFilter },
+  column: { filterValue = undefined, preFilteredRows, setFilter, autoResetFilters },
 }) {
   // const count = preFilteredRows.length
   var elems = document.querySelectorAll('.trandatepicker'); 
@@ -52,10 +52,24 @@ function DateFilter({
         perPage:50
       });
     },
-    onClose: () => setFilter('clear')
-    
-    , // Set undefined to remove the filter entirely
-    showClearBtn: true
+    onClose: () => {
+      setFilter(undefined)
+      console.log("closed")
+      document.getElementById('myTPager').innerHTML = ''
+      $('#myTranTable').pageMe({
+        pagerSelector:'#myTPager',
+        activeColor: 'green',
+        prevText:'Anterior',
+        nextText:'Siguiente',
+        showPrevNext:true,
+        hidePageNumbers:false,
+        perPage:50
+      });
+      return null
+    },
+    maxDate: new Date(),
+    onDraw : () => console.log("draw")
+
   });
 
   return (
@@ -163,7 +177,7 @@ fuzzyTextFilterFn.autoRemove = val => !val
 const Transactions = () => {
   const [status, setStatus] = useState(false);
 
-  const [data, setdata] = useState([{user_id: '-', phoneNumber: '-', registrationDate: '-', state: '-', }]);
+  const [data, setdata] = useState([]);
   $.fn.pageMe = function(opts){
     var $this = this,
         defaults = {
@@ -268,14 +282,14 @@ const Transactions = () => {
       let entries = res.val();
       Object.keys(entries).forEach(key =>{
         records.push({ 
+          status: entries[key].status,
           name: entries[key].name,
           amount: entries[key].amount,
           discountedAmount: entries[key].discountedAmount,
-          orderDate: new Date(entries[key].orderDate).toLocaleDateString(),
+          orderDate: entries[key].orderDate ? new Date(entries[key].orderDate).toLocaleDateString(): '',
           paymentMethod: entries[key].paymentMethod,
           phoneNumber: entries[key].phoneNumber,
-          status: entries[key].status,
-          key,
+          key: key || '-',
         })
       }
         )
@@ -295,7 +309,6 @@ const Transactions = () => {
       })
       .catch(err => console.log("Manual Error", err))
     }, [status])
-    // data = [{user_id: '-', phoneNumber: '-', registrationDate: '-'}];
 
     
 	const downloadCSV = (csv, filename) => {
@@ -341,28 +354,23 @@ const Transactions = () => {
       fuzzyText: fuzzyTextFilterFn,
       // Or, override the default text filter to use
       // "startWith"
-      text: (rows, id, filterValue) => {
-        return rows.filter(row => {
-          const rowValue = row.values[id]
-          return rowValue !== undefined
-            ? String(rowValue)
-                .toLowerCase()
-                .startsWith(String(filterValue).toLowerCase())
-            : true
-        })
-      },
+      text: (rows, id, filterValue) => rows.filter(row => row.values[id] !== undefined ? 
+          String(row.values[id]).toLowerCase().startsWith(String(filterValue).toLowerCase())
+          : true
+        )
+      ,
     }),[])
   const defaultColumn = React.useMemo(() => ({Filter: DefaultColumnFilter}),[])
   // const dispatch = useDispatch();
   
   const columns = React.useMemo(() => [
+      { Header: 'Status', accessor: 'status'},
       { Header: 'Name', accessor: 'name' },
       { Header: 'Amount', accessor: 'amount', },
       { Header: 'Discounted', accessor: 'discountedAmount'},
-      { Header: 'Order Date', accessor: 'orderDate', Filter: DateFilter },
+      { Header: 'Order Date', accessor: 'orderDate', Filter: DateFilter, autoResetFilters: true },
       { Header: 'Payment', accessor: 'paymentMethod' },
       { Header: 'Phone Number', accessor: 'phoneNumber' },
-      { Header: 'Status', accessor: 'status'},
       { Header: '', accessor: 'key'}
     ],[])  
   const { 
@@ -374,7 +382,8 @@ const Transactions = () => {
     headerGroups, 
     visibleColumns, 
     setGlobalFilter,
-    preGlobalFilteredRows } = useTable({ data, columns, defaultColumn, filterTypes }, useFilters, useGlobalFilter, useSortBy )
+    preGlobalFilteredRows,
+    autoResetFilters } = useTable({ data, columns, defaultColumn, filterTypes }, useFilters, useGlobalFilter, useSortBy )
     return (
       <div className="card" style={{padding: 10, borderRadius: 10}}>
         <div className='card-content'>
@@ -389,7 +398,7 @@ const Transactions = () => {
 			  			</button>
 			  		</div>
 			  	</div>
-          <table {...getTableProps()} id="myTranTable" style={{overflow: 'scroll'}} >
+          <table {...getTableProps()} id="myTranTable" className='highlight' style={{overflow: 'scroll'}} >
             <thead>
               {headerGroups.map(headerGroup => (
                 <tr {...headerGroup.getHeaderGroupProps()} >
@@ -403,17 +412,12 @@ const Transactions = () => {
                   ))} */}
                   {headerGroup.headers.length ?
                   <>
+                    <th></th>
                     <th {...headerGroup.headers[0].getHeaderProps(
                     // headerGroup.headers[0].getSortByToggleProps()
-                     )}> {headerGroup.headers[0].render('Header')}
-                      <span> {headerGroup.headers[0].isSorted ? (headerGroup.headers[0].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
-                      <div>{headerGroup.headers[0].canFilter ? headerGroup.headers[0].render('Filter') : null}</div>
-                    </th>
-                    <th {...headerGroup.headers[1].getHeaderProps(
-                    // headerGroup.headers[1].getSortByToggleProps()
                      )}> {headerGroup.headers[1].render('Header')}
-                      <span> {headerGroup.headers[1].isSorted ? (headerGroup.headers[1].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
-                      <div>{headerGroup.headers[1].canFilter ? headerGroup.headers[1].render('Filter') : null}</div>
+                      <span> {headerGroup.headers[1].isSorted ? (headerGroup.headers[0].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      <div>{headerGroup.headers[1].canFilter ? headerGroup.headers[0].render('Filter') : null}</div>
                     </th>
                     <th {...headerGroup.headers[2].getHeaderProps(
                     // headerGroup.headers[2].getSortByToggleProps()
@@ -427,20 +431,25 @@ const Transactions = () => {
                       <span> {headerGroup.headers[3].isSorted ? (headerGroup.headers[3].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       <div>{headerGroup.headers[3].canFilter ? headerGroup.headers[3].render('Filter') : null}</div>
                     </th>
-                    <th colSpan='2' {...headerGroup.headers[4].getHeaderProps(
+                    <th {...headerGroup.headers[4].getHeaderProps(
                     // headerGroup.headers[4].getSortByToggleProps()
                      )}> {headerGroup.headers[4].render('Header')}
                       <span> {headerGroup.headers[4].isSorted ? (headerGroup.headers[4].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       <div>{headerGroup.headers[4].canFilter ? headerGroup.headers[4].render('Filter') : null}</div>
                     </th>
-                    <th></th>
-                    <th {...headerGroup.headers[5].getHeaderProps(
+                    <th colSpan='2' {...headerGroup.headers[5].getHeaderProps(
                     // headerGroup.headers[5].getSortByToggleProps()
                      )}> {headerGroup.headers[5].render('Header')}
                       <span> {headerGroup.headers[5].isSorted ? (headerGroup.headers[5].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       <div>{headerGroup.headers[5].canFilter ? headerGroup.headers[5].render('Filter') : null}</div>
                     </th>
                     <th></th>
+                    <th {...headerGroup.headers[6].getHeaderProps(
+                    // headerGroup.headers[6].getSortByToggleProps()
+                     )}> {headerGroup.headers[6].render('Header')}
+                      <span> {headerGroup.headers[6].isSorted ? (headerGroup.headers[6].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      <div>{headerGroup.headers[6].canFilter ? headerGroup.headers[6].render('Filter') : null}</div>
+                    </th>
                     <th></th>
                   </>
                   : null}
@@ -454,27 +463,29 @@ const Transactions = () => {
                   prepareRow(row);
                   // console.log(row.);
                   return (
-                    <tr {...row.getRowProps()}  
+                    <tr {...row.getRowProps()} className={ row.cells[0].value ? ' green-text text-darken-3': ' red-text text-darken-4'}  
                       // onClick={() => dispatch(replaceQuery(row.original))}
                     >
-                      <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
+                      <td {...row.cells[0].getCellProps()}>
+                        {row.cells[0].value ? 
+                          <i className='material-icons'>check_circle</i> : 
+                          <i className='material-icons'>close</i>
+                        }
+                      </td>
                       <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
-                      <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>      
+                      <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>
                       <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>      
+                      <td {...row.cells[4].getCellProps()}>{row.cells[4].render('Cell')}</td>      
                       {/* <td {...row.cells[3].getCellProps()}>
                         {row.cells[3].value ? new Date(parseInt(row.cells[3].value)).toLocaleDateString() : ''}
                       </td> */}
-                      <td colSpan='2' {...row.cells[4].getCellProps()}>{row.cells[4].render('Cell')}</td>
-                      <td {...row.cells[5].getCellProps()}>{row.cells[5].render('Cell')}</td>
-                      <td {...row.cells[6].getCellProps()}>
-                        {row.cells[6].value ? 
-                          <i style={{color: 'green'}} className='material-icons'>check_circle</i> : 
-                          <i style={{color: 'red'}} className='material-icons'>close</i>
-                        }
-                      </td>
+                      <td colSpan='2' {...row.cells[5].getCellProps()}>{row.cells[5].render('Cell')}</td>
+                      <td {...row.cells[6].getCellProps()}>{row.cells[6].render('Cell')}</td>
                       <td {...row.cells[7].getCellProps()}>
-                        <i className='material-icons' onClick={()=>console.log(row.cells[7]) } >delete</i>
-                      </td>
+                        {row.cells[7].value !== '-' ?
+                          <i className='material-icons' onClick={()=>console.log(row.cells[7]) } >delete</i>
+                        : ""}
+                        </td>
                   </tr>
                 )}
               )}

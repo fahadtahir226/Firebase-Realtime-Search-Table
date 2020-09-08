@@ -3,8 +3,17 @@ import { Link } from 'react-router-dom'
 import { SignInCall } from '../../Firebase/auth';
 import { googleLogin } from '../../Firebase/google';
 import icon from '../../logo.svg'
+import { auth } from '../../Firebase/auth'
 
 class SignIn extends Component {
+  componentDidMount(){
+    auth.onAuthStateChanged(user =>{
+
+      if(auth){
+        window.location.replace('/dashboard')    
+      }
+    })
+  }
   render() {
     return (
       <div className="container-fluid" >
