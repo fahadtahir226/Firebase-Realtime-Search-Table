@@ -1,16 +1,15 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom'
 import { SignInCall } from '../../Firebase/auth';
-import { googleLogin } from '../../Firebase/google';
 import icon from '../../logo.svg'
 import { auth } from '../../Firebase/auth'
 
 class SignIn extends Component {
   componentDidMount(){
     auth.onAuthStateChanged(user =>{
-
-      if(auth){
+      if(user){
         window.location.replace('/dashboard')    
+        console.log(user);
       }
     })
   }
@@ -50,17 +49,6 @@ class SignIn extends Component {
                 <div className='col s2 m3 l3' style={{paddingRight: 0}}><div className="divider" style={{marginTop: 10}} ></div></div>
                 <div className='col s8 m6 l6' style={{paddingLeft: 5, paddingRight: 5, color: 'dimgray'}} >OR LOGIN WITH YOUR SOCIAL MEDIA</div> 
                 <div className='col s2 m3 l3' style={{paddingLeft: 0}} ><div className="divider" style={{marginTop: 10}} ></div></div>
-              </div>
-              <div class="row">              
-                <div class="col s12 m12 l12" style={{marginTop: 10}}>
-                  <button 
-                    class="black white-text col s12 m12 l12 btn waves-effect waves-light" 
-                    onClick={googleLogin} name="action">
-                    Google
-                    <i class="fa fa-google left"  style={{fontSize:24}}></i>
-                    <i class="material-icons right">send</i>
-                  </button>
-                </div>
               </div>
               <div className='row' >Don't have an account? <Link to='sign-up' >Sign Up</Link> here</div>
 
