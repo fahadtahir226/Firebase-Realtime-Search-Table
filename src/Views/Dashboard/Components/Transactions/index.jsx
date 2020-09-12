@@ -3,7 +3,7 @@ import M from 'materialize-css'
 import { exportTableToCSV } from '../CSV'
 import { RDB } from '../../../../Firebase/database'
 // import { useSelector } from 'react-redux';
-import { useTable, useFilters, useSortBy, useGlobalFilter, usePagination } from 'react-table'
+import { useTable, useFilters, useSortBy, useGlobalFilter, usePagination, useRowSelect } from 'react-table'
 import matchSorter from 'match-sorter'
 
 
@@ -15,11 +15,12 @@ function DefaultColumnFilter({
 
   return (
     <input
+      style={{marginBottom: 4}}
       value={filterValue || ''}
       onChange={e => {
         setFilter(e.target.value || undefined) // Set undefined to remove the filter entirely
       }}
-      placeholder={`Search ${count} records...`}
+      placeholder="Search..."
     />
   )
 }
@@ -43,6 +44,7 @@ function DateFilter({column: { filterValue, preFilteredRows, setFilter }}) {
 
   return (
     <input
+      style={{marginBottom: 4}}
       className='trandatepicker'
       type='text'
       onChange = {e => {
@@ -71,7 +73,7 @@ function SelectColumnFilter({column: { filterValue, setFilter, preFilteredRows, 
     <>
       <select
         className='browser-default'
-        style={{border: 'none', borderBottom: '1px solid #9e9e9e'}}
+        style={{border: 'none', marginBottom: 4, borderBottom: '1px solid #9e9e9e'}}
         value={filterValue}
         onChange={e => {
           setFilter(e.target.value || undefined)
@@ -114,6 +116,29 @@ function fuzzyTextFilterFn(rows, id, filterValue) {
 fuzzyTextFilterFn.autoRemove = val => !val
 
 
+
+const IndeterminateCheckbox = React.forwardRef(
+  ({ indeterminate, ...rest }, ref) => {
+    const defaultRef = React.useRef()
+    const resolvedRef = ref || defaultRef
+
+    React.useEffect(() => {
+      resolvedRef.current.indeterminate = indeterminate
+    }, [resolvedRef, indeterminate])
+
+    return (
+        // <form action="#">
+          // {/* <p> */}
+            <label>
+              <input className="filled-in" type="checkbox" ref={resolvedRef} {...rest} />
+              <span></span>
+            </label>
+          // {/* </p> */}
+        // </form>
+    )
+  }
+)
+
 const Transactions = () => {
   const [status, setStatus] = useState(false);
 
@@ -128,7 +153,7 @@ const Transactions = () => {
     .then( res => {
       let entries = res.val();
       Object.keys(entries).forEach(key =>{
-        records.push({ 
+        records.unshift({ 
           name: entries[key].name,
           amount: entries[key].amount,
           discountedAmount: entries[key].discountedAmount,
@@ -141,6 +166,8 @@ const Transactions = () => {
       })
       setStatus(true);
       setdata(records)
+      selectedFlatRows.map(d => console.log(d.original))
+      
     })
     .catch(err => console.log("Manual Error", err))
     }, [status])
@@ -191,10 +218,36 @@ const Transactions = () => {
     nextPage,
     previousPage,
     setPageSize,
-    state: { pageIndex, pageSize },
+    selectedFlatRows,
+    state: { selectedRowIds, pageIndex, pageSize },
     } = useTable(
       { data, columns, initialState: { pageIndex: 0, pageSize: 25  }, defaultColumn, filterTypes},
-      useFilters, useGlobalFilter, useSortBy, usePagination )
+      useFilters, useGlobalFilter, useSortBy, usePagination, useRowSelect,
+        hooks => {
+          hooks.visibleColumns.push(columns => [
+            // Let's make a column for selection
+            {
+              id: 'selection',
+              // The header can use the table's getToggleAllRowsSelectedProps method
+              // to render a checkbox
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <div>
+                  <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+                </div>
+              ),
+              // The cell can use the individual row's getToggleRowSelectedProps method
+              // to the render a checkbox
+              Cell: ({ row }) => (
+                <div>
+                  <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+                </div>
+              ),
+            },
+            ...columns,
+          ])
+        }
+      )
+      // } )
     return (
       <div className="card" style={{padding: 10, borderRadius: 10}}>
         <div className='card-content' style={{overflowX: 'scroll'}}>
@@ -217,7 +270,7 @@ const Transactions = () => {
                   <>
 
                     <th {...headerGroup.headers[0].getHeaderProps(
-                    // headerGroup.headers[0].getSortByToggleProps()
+                    headerGroup.headers[0].getSortByToggleProps()
                      )}> 
                      {headerGroup.headers[0].render('Header')}
                       <span> {headerGroup.headers[0].isSorted ? (headerGroup.headers[0].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
@@ -254,11 +307,18 @@ const Transactions = () => {
                       <div>{headerGroup.headers[5].canFilter ? headerGroup.headers[5].render('Filter') : null}</div>
                     </th>
                     <th></th>
-                    <th style={{width: 120, textAlign: "center"}} {...headerGroup.headers[6].getHeaderProps(
+                    <th style={{width: 120}} {...headerGroup.headers[6].getHeaderProps(
                     // headerGroup.headers[6].getSortByToggleProps()
                      )}> {headerGroup.headers[6].render('Header')}
                       <span> {headerGroup.headers[6].isSorted ? (headerGroup.headers[6].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       <div>{headerGroup.headers[6].canFilter ? headerGroup.headers[6].render('Filter') : null}</div>
+                    </th>
+
+                    <th style={{width: 120}} {...headerGroup.headers[7].getHeaderProps(
+                    // headerGroup.headers[7].getSortByToggleProps()
+                     )}> {headerGroup.headers[7].render('Header')}
+                      <span> {headerGroup.headers[7].isSorted ? (headerGroup.headers[7].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      <div>{headerGroup.headers[7].canFilter ? headerGroup.headers[7].render('Filter') : null}</div>
                     </th>
 
                     <th></th>
@@ -288,15 +348,16 @@ const Transactions = () => {
                       <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>   
                       <td {...row.cells[4].getCellProps()}>{row.cells[4].render('Cell')}</td>
                       <td colSpan='2' {...row.cells[5].getCellProps()}>{row.cells[5].render('Cell')}</td>
-                      <td {...row.cells[6].getCellProps()}>
-                      {row.cells[6].value === 'VERIFIED' ?
-                        <span className="new badge green" data-badge-caption={row.cells[6].value}></span> :
-                        <span className="new badge red" data-badge-caption={row.cells[6].value}></span>
+                      <td {...row.cells[6].getCellProps()}>{row.cells[6].render('Cell')}</td>
+                      <td {...row.cells[7].getCellProps()}>
+                      {row.cells[7].value === 'VERIFIED' ?
+                        <span className="new badge green" data-badge-caption={row.cells[7].value}></span> :
+                        <span className="new badge red" data-badge-caption={row.cells[7].value}></span>
                       }  
                       </td>
 
-                      <td {...row.cells[7].getCellProps()}>
-                        {row.cells[7].value !== '-' ? <i className='material-icons' onClick={()=> deleteItem(row.values.key) } >delete</i> : ""}
+                      <td {...row.cells[8].getCellProps()}>
+                        {row.cells[8].value !== '-' ? <i className='material-icons' onClick={()=> deleteItem(row.values.key) } >delete</i> : ""}
                       </td>
                   </tr>
                 )}
