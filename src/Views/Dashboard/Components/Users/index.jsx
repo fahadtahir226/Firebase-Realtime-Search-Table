@@ -97,7 +97,7 @@ const Users = () => {
     .then( res => {
       let entries = res.val();
       Object.keys(entries).forEach(key =>{
-        records.push({ 
+        records.unshift({ 
           user_id: entries[key].user_id,
           phoneNumber: entries[key].phoneNumber,
           registrationDate: new Date(entries[key].registrationDate).toLocaleDateString(),

@@ -15,7 +15,7 @@ function DefaultColumnFilter({
 
   return (
     <input
-      style={{marginBottom: 4}}
+      style={{marginBottom: 6}}
       value={filterValue || ''}
       onChange={e => {
         setFilter(e.target.value || undefined) // Set undefined to remove the filter entirely
@@ -44,7 +44,7 @@ function DateFilter({column: { filterValue, preFilteredRows, setFilter }}) {
 
   return (
     <input
-      style={{marginBottom: 4}}
+      style={{marginBottom: 6}}
       className='trandatepicker'
       type='text'
       onChange = {e => {
@@ -52,7 +52,7 @@ function DateFilter({column: { filterValue, preFilteredRows, setFilter }}) {
         console.log("Date Changed: ", e);
       }}
       defaultValue={ filterValue || ''}
-      placeholder='Date'
+      placeholder='Search...'
     />
   )
 }
@@ -73,7 +73,7 @@ function SelectColumnFilter({column: { filterValue, setFilter, preFilteredRows, 
     <>
       <select
         className='browser-default'
-        style={{border: 'none', marginBottom: 4, borderBottom: '1px solid #9e9e9e'}}
+        style={{border: 'none', marginBottom: 6, borderBottom: '1px solid #9e9e9e'}}
         value={filterValue}
         onChange={e => {
           setFilter(e.target.value || undefined)
@@ -103,7 +103,7 @@ function NumberColumnFilter({ column: { filterValue, setFilter } }) {
         value={filterValue || undefined}
         type="number"
         onChange={e => {setFilter(e.target.value ? parseInt(e.target.value, 10): undefined)}}
-        placeholder="here..."
+        placeholder="Search..."
         style={{ width: '70px', marginRight: '0.5rem' }}
       />
     </div>
@@ -127,14 +127,14 @@ const IndeterminateCheckbox = React.forwardRef(
     }, [resolvedRef, indeterminate])
 
     return (
-        // <form action="#">
-          // {/* <p> */}
+        <form action="#">
+          {/* <p> */}
             <label>
               <input className="filled-in" type="checkbox" ref={resolvedRef} {...rest} />
               <span></span>
             </label>
-          // {/* </p> */}
-        // </form>
+          {/* </p> */}
+        </form>
     )
   }
 )
@@ -158,6 +158,7 @@ const Transactions = () => {
           amount: entries[key].amount,
           discountedAmount: entries[key].discountedAmount,
           orderDate: entries[key].orderDate ? new Date(entries[key].orderDate).toLocaleDateString(): '',
+          orderTime: entries[key].orderDate ? new Date(entries[key].orderDate).toLocaleTimeString(): '',
           paymentMethod: entries[key].paymentMethod,
           phoneNumber: entries[key].phoneNumber,
           status: entries[key].status ? 'VERIFIED' : 'PENDING',
@@ -189,11 +190,12 @@ const Transactions = () => {
     { Header: 'NAME', accessor: 'name' },
     { Header: 'AMOUNT', accessor: 'amount', Filter: NumberColumnFilter, filter: filterExact },
     { Header: 'DISCOUNT', accessor: 'discountedAmount', Filter: NumberColumnFilter, filter: filterExact},
-    { Header: 'ORDER', accessor: 'orderDate', Filter: DateFilter },
+    { Header: 'Date', accessor: 'orderDate', Filter: DateFilter },
     { Header: 'PAYMENT', accessor: 'paymentMethod' },
     { Header: 'PHONE', accessor: 'phoneNumber' },
     { Header: 'STATUS', accessor: 'status', Filter: SelectColumnFilter, filter: 'includes'},
-    { Header: '', accessor: 'key'}
+    { Header: '', accessor: 'key'},
+    { accessor: 'orderTime' },
     ],[]) 
 
   const deleteItem = key => {
@@ -346,7 +348,10 @@ const Transactions = () => {
                       <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
                       <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>      
                       <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>   
-                      <td {...row.cells[4].getCellProps()}>{row.cells[4].render('Cell')}</td>
+                      <td {...row.cells[4].getCellProps()}>
+                        {row.cells[4].render('Cell')}  {' '}                      
+                        {row.cells[9].render('Cell')}
+                      </td>
                       <td colSpan='2' {...row.cells[5].getCellProps()}>{row.cells[5].render('Cell')}</td>
                       <td {...row.cells[6].getCellProps()}>{row.cells[6].render('Cell')}</td>
                       <td {...row.cells[7].getCellProps()}>
