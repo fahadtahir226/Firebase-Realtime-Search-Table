@@ -100,7 +100,8 @@ const Users = () => {
         records.unshift({ 
           user_id: entries[key].user_id,
           phoneNumber: entries[key].phoneNumber,
-          registrationDate: new Date(entries[key].registrationDate).toLocaleDateString(),
+          registrationDate: entries[key].registrationDate ? new Date(entries[key].registrationDate).toLocaleDateString() : '',
+          registrationTime: entries[key].registrationDate ? new Date(entries[key].registrationDate).toLocaleTimeString(): '',
           state: entries[key].state
         })
       })
@@ -138,7 +139,8 @@ const Users = () => {
       { Header: 'USER ID', accessor: 'user_id' }, // accessor is the "key" in the data
       { Header: 'PHONE', accessor: 'phoneNumber' },
       { Header: 'DATE', accessor: 'registrationDate', Filter: DateFilter },
-      { Header: 'STATE', accessor: 'state', Filter: SelectColumnFilter, filter: 'includes'}
+      { Header: 'STATE', accessor: 'state', Filter: SelectColumnFilter, filter: 'includes'},
+      { accessor: 'registrationTime' },
     ],[])
 
     
@@ -182,17 +184,26 @@ const Users = () => {
             <thead>
               {headerGroups.map(headerGroup => (
                 <tr {...headerGroup.getHeaderGroupProps()} >
-                  {headerGroup.headers.map(column => (
-                 <th {...column.getHeaderProps(
-                  //  column.getSortByToggleProps()
-                   )}>
-                      {column.render('Header')}
-                     <span>
-                       {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
-                     </span>
-                     <div>{column.canFilter ? column.render('Filter') : null}</div>
-                    </th>
-                  ))}
+                  {/* {headerGroup.headers.map(column => ( */}
+                  <th {...headerGroup.headers[0].getHeaderProps()}>{headerGroup.headers[0].render('Header')}
+                    <span>{headerGroup.headers[0].isSorted ? (headerGroup.headers[0].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                    <div>{headerGroup.headers[0].canFilter ? headerGroup.headers[0].render('Filter') : null}</div>
+                  </th>
+                  <th {...headerGroup.headers[1].getHeaderProps()}>{headerGroup.headers[1].render('Header')}
+                    <span>{headerGroup.headers[1].isSorted ? (headerGroup.headers[1].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                    <div>{headerGroup.headers[1].canFilter ? headerGroup.headers[1].render('Filter') : null}</div>
+                  </th>
+
+                  <th {...headerGroup.headers[2].getHeaderProps()}>{headerGroup.headers[2].render('Header')}
+                    <span>{headerGroup.headers[2].isSorted ? (headerGroup.headers[2].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                    <div>{headerGroup.headers[2].canFilter ? headerGroup.headers[2].render('Filter') : null}</div>
+                  </th>
+
+                  <th {...headerGroup.headers[3].getHeaderProps()}>{headerGroup.headers[3].render('Header')}
+                    <span>{headerGroup.headers[3].isSorted ? (headerGroup.headers[3].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                    <div>{headerGroup.headers[3].canFilter ? headerGroup.headers[3].render('Filter') : null}</div>
+                  </th>
+                  {/* ))} */}
                 </tr>
               ))}
             </thead>
@@ -201,10 +212,10 @@ const Users = () => {
                 prepareRow(row);
                 return (
                   <tr {...row.getRowProps()} >
-                    {/* {console.log(i, row)} */}
+                    {console.log(i, row)}
                     <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
                     <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
-                    <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>
+                <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}{' '}{row.values.registrationTime}</td>
                     <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>      
                   </tr>
                 )}
