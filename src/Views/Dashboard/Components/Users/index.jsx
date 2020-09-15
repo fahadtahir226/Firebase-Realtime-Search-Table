@@ -168,7 +168,7 @@ const Users = () => {
     
     return (
       <div className="card" style={{padding: 10, borderRadius: 10}}>
-        <div className='card-content'  style={{overflow: 'scroll'}}>
+        <div className='card-content'  style={{overflowX: 'scroll'}}>
         	<div style={{display: 'flex'}}>
 			  		<h5 style={{flex:'1', textAlign: 'left', marginTop: 5}} >RESULTS</h5>
 			  		<div>
@@ -244,14 +244,16 @@ const Users = () => {
           </div>
 
           {!status ?
-            <div className="preloader-wrapper big active center" style={{ textAlign: 'center' ,margin: 100, }}>
-            <div className="spinner-layer spinner-blue-only">
-              <div className="circle-clipper left">
-                <div className="circle"></div>
-              </div><div className="gap-patch">
-                <div className="circle"></div>
-              </div><div className="circle-clipper right">
-                <div className="circle"></div>
+            <div style={{textAlign: "center"}} >
+              <div className="preloader-wrapper big active center" style={{ margin: 100, }}>
+              <div className="spinner-layer spinner-blue-only">
+                <div className="circle-clipper left">
+                  <div className="circle"></div>
+                </div><div className="gap-patch">
+                  <div className="circle"></div>
+                </div><div className="circle-clipper right">
+                  <div className="circle"></div>
+                </div>
               </div>
             </div>
           </div> : null}

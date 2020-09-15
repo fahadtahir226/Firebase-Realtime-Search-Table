@@ -73,7 +73,7 @@ function SelectColumnFilter({column: { filterValue, setFilter, preFilteredRows, 
     <>
       <select
         className='browser-default'
-        style={{border: 'none', marginBottom: 6, borderBottom: '1px solid #9e9e9e'}}
+        style={{border: 'none', marginBottom: 6, borderBottom: '1px solid #9e9e9e', borderRadius: 0}}
         value={filterValue}
         onChange={e => {
           setFilter(e.target.value || undefined)
@@ -104,7 +104,7 @@ function NumberColumnFilter({ column: { filterValue, setFilter } }) {
         type="number"
         onChange={e => {setFilter(e.target.value ? parseInt(e.target.value, 10): undefined)}}
         placeholder="Search..."
-        style={{ width: '70px', marginRight: '0.5rem' }}
+        style={{ width: '70px', marginRight: '0.5rem', marginBottom: 6 }}
       />
     </div>
   )
@@ -123,33 +123,34 @@ const IndeterminateCheckbox = React.forwardRef(
     const resolvedRef = ref || defaultRef
 
     React.useEffect(() => {
+      console.log(resolvedRef);
       resolvedRef.current.indeterminate = indeterminate
     }, [resolvedRef, indeterminate])
 
     return (
-        <form action="#">
-          {/* <p> */}
-            <label>
-              <input className="filled-in" type="checkbox" ref={resolvedRef} {...rest} />
-              <span></span>
-            </label>
-          {/* </p> */}
-        </form>
+      <form style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}} >
+        <label>
+          <input multiple className="filled-in" type="checkbox" ref={resolvedRef} {...rest} />
+          <span></span>
+        </label>
+      </form>
     )
   }
 )
 
 const Transactions = () => {
   const [status, setStatus] = useState(false);
-
+  const [selectedRows, setSelectedRows] = useState([]);
   const [data, setdata] = useState([]);
 
 	useEffect(() => {
-    var elems = document.querySelectorAll('select');
-    M.FormSelect.init(elems);   
+      var deleteALLButton = document.querySelectorAll('.fixed-action-btn');
+      var select = document.querySelectorAll('select');
+      M.FormSelect.init(select);   
+      M.FloatingActionButton.init(deleteALLButton);
     
     let records = []; 
-    RDB.ref('Transactions').once('value')
+    RDB.ref('Transactions_test').once('value')
     .then( res => {
       let entries = res.val();
       Object.keys(entries).forEach(key =>{
@@ -184,7 +185,6 @@ const Transactions = () => {
       : true )
   }),[])
   const defaultColumn = React.useMemo(() => ({Filter: DefaultColumnFilter}),[])
-  // const dispatch = useDispatch();
   
   const columns = React.useMemo(() => [
     { Header: 'NAME', accessor: 'name' },
@@ -201,10 +201,26 @@ const Transactions = () => {
   const deleteItem = key => {
     console.log(key);
     RDB.ref(`Transactions/${key}`).remove()
-    .then(res => console.log(res))
-    .catch(err => console.log(err))
+    .then(() => {
+      alert('Item Deleted!');
+      setInterval(() => {
+        window.location.reload()
+      }, 2000);
+    })
+    .catch(err => alert(err))
   }
-
+  const deleteAll = () => {
+    if(!selectedRows.length) return alert('No Results Selected to Delete');
+    Promise.all(selectedRows.map(row => RDB.ref(`Transactions/${row}`).remove()))
+    .then(() => {
+      alert('Items Deleted!');  
+      setSelectedRows([])
+      setInterval(() => {
+        window.location.reload()
+      }, 2000)
+    })
+    .catch(err => alert(err))
+  }
   const { 
     getTableProps,
     getTableBodyProps, 
@@ -223,26 +239,36 @@ const Transactions = () => {
     selectedFlatRows,
     state: { selectedRowIds, pageIndex, pageSize },
     } = useTable(
-      { data, columns, initialState: { pageIndex: 0, pageSize: 25  }, defaultColumn, filterTypes},
+      { data, columns, initialState: { selectedRowIds: [],pageIndex: 0, pageSize: 25  }, defaultColumn, filterTypes},
       useFilters, useGlobalFilter, useSortBy, usePagination, useRowSelect,
         hooks => {
           hooks.visibleColumns.push(columns => [
             // Let's make a column for selection
             {
               id: 'selection',
-              // The header can use the table's getToggleAllRowsSelectedProps method
-              // to render a checkbox
-              Header: ({ getToggleAllRowsSelectedProps }) => (
-                <div>
-                  <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
-                </div>
-              ),
-              // The cell can use the individual row's getToggleRowSelectedProps method
-              // to the render a checkbox
+              // Header: ({ getToggleAllRowsSelectedProps }) => (
+              //   <div><IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} /></div>
+              // ),
               Cell: ({ row }) => (
-                <div>
-                  <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-                </div>
+                <label>
+                  <input onChange={e => {
+                    let ids = selectedRows;
+                    if(e.target.checked){
+                      ids.push(e.target.id)
+                    }
+                    else{
+                      var index = ids.indexOf(e.target.id);
+                      if (index > -1) {
+                        ids.splice(index, 1);
+                      }
+                    }
+                    setSelectedRows(ids)
+                    console.log(ids);
+                    // console.log(row);
+                  }} 
+                    className="filled-in" type="checkbox" id={row.values.key} />
+                  <span></span>
+                </label>
               ),
             },
             ...columns,
@@ -258,6 +284,10 @@ const Transactions = () => {
 			  			RESULTS
 			  		</h5>
 			  		<div>
+              <button style={{marginRight: 5}} disabled={!status} className='btn red' onClick={() => deleteAll()}>
+			  				<i className='material-icons right' style={{marginLeft: 0}}>delete</i>
+			  				<span className='hide-on-med-and-down' style={{marginRight: 10}}>Delete All</span>
+			  			</button>
               <button disabled={data.length < 1 || !status} className='btn' onClick={() => exportTableToCSV('Transactions.csv', rows, ['Status', 'Name', 'Amount', 'Discounted Amount', 'Order Date', 'Payment', 'Phone Number', 'Transaction Id'])}>
 			  				<i className='material-icons right' style={{marginLeft: 0}}>file_download</i>
 			  				<span className='hide-on-med-and-down' style={{marginRight: 10}}>Download CSV</span>
@@ -270,7 +300,6 @@ const Transactions = () => {
                 <tr {...headerGroup.getHeaderGroupProps()} >
                   {headerGroup.headers.length ?
                   <>
-
                     <th {...headerGroup.headers[0].getHeaderProps(
                     headerGroup.headers[0].getSortByToggleProps()
                      )}> 
@@ -336,14 +365,7 @@ const Transactions = () => {
                   prepareRow(row);
                   // console.log(row.);
                   return (
-                    <tr {...row.getRowProps()}   
-                      // onClick={() => dispatch(replaceQuery(row.original))}
-                    >
-                      {/* <td {...row.cells[0].getCellProps()}>
-                        {row.cells[0].value ? 
-                          <i className='material-icons'>check_circle</i> : <i className='material-icons'>close</i>
-                        }
-                      </td> */}
+                    <tr {...row.getRowProps()} >
                       <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
                       <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
                       <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>      
