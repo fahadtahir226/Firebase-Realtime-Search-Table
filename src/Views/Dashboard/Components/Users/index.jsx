@@ -170,7 +170,7 @@ const Users = () => {
     
     return (
       <div className="card" style={{padding: 10, borderRadius: 10}}>
-        <div className='card-content'  style={{overflowX: 'scroll'}}>
+        <div className='card-content' >
         	<div style={{display: 'flex'}}>
 			  		<h5 style={{flex:'1', textAlign: 'left', marginTop: 5}} >RESULTS</h5>
 			  		<div>
@@ -180,7 +180,8 @@ const Users = () => {
 			  			</button>
 			  		</div>
 			  	</div>
-          <table className='highlight' {...getTableProps()} id="myUserTable" style={{overflow: 'scroll', display: status ? null: 'none'}} >
+          <div style={{overflow: 'scroll'}} >
+          <table className='highlight' {...getTableProps()} id="myUserTable" style={{display: status ? null: 'none'}} >
             <thead>
               {headerGroups.map(headerGroup => (
                 <tr {...headerGroup.getHeaderGroupProps()} >
@@ -223,6 +224,7 @@ const Users = () => {
             </tbody>
 
           </table>
+          </div>
           <div className="pagination container" style={{display: status ? null: 'none'}}>
             <div className='row' >
               <div className='col' style={{marginTop: 25}}>

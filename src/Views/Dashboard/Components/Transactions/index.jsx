@@ -150,7 +150,7 @@ const Transactions = () => {
       M.FloatingActionButton.init(deleteALLButton);
     
     let records = []; 
-    RDB.ref('Transactions_test').once('value')
+    RDB.ref('Transactions').once('value')
     .then( res => {
       let entries = res.val();
       Object.keys(entries).forEach(key =>{
@@ -278,7 +278,7 @@ const Transactions = () => {
       // } )
     return (
       <div className="card" style={{padding: 10, borderRadius: 10}}>
-        <div className='card-content' style={{overflowX: 'scroll'}}>
+        <div className='card-content' >
         	<div style={{display: 'flex'}}>
 			  		<h5 style={{flex:'1', textAlign: 'left', marginTop: 5}} >
 			  			RESULTS
@@ -294,7 +294,8 @@ const Transactions = () => {
 			  			</button>
 			  		</div>
 			  	</div>
-          <table {...getTableProps()} id="myTranTable" className='highlight' style={{overflow: 'scroll', display: status ? null: 'none'}} >
+          <div style={{overflowX: 'scroll'}} >
+          <table {...getTableProps()} id="myTranTable" className='highlight' style={{display: status ? null: 'none'}} >
             <thead>
               {headerGroups.map(headerGroup => (
                 <tr {...headerGroup.getHeaderGroupProps()} >
@@ -391,6 +392,7 @@ const Transactions = () => {
               )} 
             </tbody>
           </table>
+          </div>
           <div className="pagination container-fluid" style={{display: status ? null: 'none'}}>
             <div className='row' >
               <div className='col' style={{marginTop: 25, paddingLeft: 0}}>
