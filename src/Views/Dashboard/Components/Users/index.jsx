@@ -95,14 +95,16 @@ const Users = () => {
     let records = []; 
     RDB.ref('Users').once('value')
     .then( res => {
-      let entries = res.val();
+      let entries = res.val(), items = res.numChildren();
       Object.keys(entries).forEach(key =>{
         records.unshift({ 
           user_id: entries[key].user_id,
           phoneNumber: entries[key].phoneNumber,
           registrationDate: entries[key].registrationDate ? new Date(entries[key].registrationDate).toLocaleDateString() : '',
           registrationTime: entries[key].registrationDate ? new Date(entries[key].registrationDate).toLocaleTimeString(): '',
-          state: entries[key].state
+          state: entries[key].state,
+          itemNo: items--,
+
         })
       })
       console.log("calling use Effect");
@@ -136,6 +138,7 @@ const Users = () => {
   // const dispatch = useDispatch();
   
   const columns = React.useMemo(() => [
+      { Header: '', accessor: 'itemNo', disableFilters: false, sortable: false },
       { Header: 'USER ID', accessor: 'user_id' }, // accessor is the "key" in the data
       { Header: 'PHONE', accessor: 'phoneNumber' },
       { Header: 'DATE', accessor: 'registrationDate', Filter: DateFilter },
@@ -187,8 +190,8 @@ const Users = () => {
                 <tr {...headerGroup.getHeaderGroupProps()} >
                   {/* {headerGroup.headers.map(column => ( */}
                   <th {...headerGroup.headers[0].getHeaderProps()}>{headerGroup.headers[0].render('Header')}
-                    <span>{headerGroup.headers[0].isSorted ? (headerGroup.headers[0].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
-                    <div>{headerGroup.headers[0].canFilter ? headerGroup.headers[0].render('Filter') : null}</div>
+                    {/* <span>{headerGroup.headers[0].isSorted ? (headerGroup.headers[0].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span> */}
+                    {/* <div>{headerGroup.headers[0].canFilter ? headerGroup.headers[0].render('Filter') :   null}</div> */}
                   </th>
                   <th {...headerGroup.headers[1].getHeaderProps()}>{headerGroup.headers[1].render('Header')}
                     <span>{headerGroup.headers[1].isSorted ? (headerGroup.headers[1].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
@@ -204,6 +207,11 @@ const Users = () => {
                     <span>{headerGroup.headers[3].isSorted ? (headerGroup.headers[3].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                     <div>{headerGroup.headers[3].canFilter ? headerGroup.headers[3].render('Filter') : null}</div>
                   </th>
+                  <th {...headerGroup.headers[4].getHeaderProps()}>{headerGroup.headers[4].render('Header')}
+                    <span>{headerGroup.headers[4].isSorted ? (headerGroup.headers[4].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                    <div>{headerGroup.headers[4].canFilter ? headerGroup.headers[4].render('Filter') : null}</div>
+                  </th>
+
                   {/* ))} */}
                 </tr>
               ))}
@@ -216,8 +224,9 @@ const Users = () => {
                     {console.log(i, row)}
                     <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
                     <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
-                <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}{' '}{row.values.registrationTime}</td>
-                    <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>      
+                    <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>
+                    <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}{' '}{row.values.registrationTime}</td>
+                    <td {...row.cells[4].getCellProps()}>{row.cells[4].render('Cell')}</td>      
                   </tr>
                 )}
               )}

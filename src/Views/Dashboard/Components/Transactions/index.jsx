@@ -171,7 +171,7 @@ const Transactions = () => {
       })
       setStatus(true);
       setdata(records)
-      selectedFlatRows.map(d => console.log(d.original))
+      // selectedFlatRows.map(d => console.log(d.original))
       
     })
     .catch(err => console.log("Manual Error", err))
@@ -255,7 +255,7 @@ const Transactions = () => {
               //   <div><IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} /></div>
               // ),
               Cell: ({ row }) => (
-                <label>
+                <label style={{textAlign: "center"}} >
                   <input onChange={e => {
                     let ids = selectedRows;
                     if(e.target.checked){
@@ -273,7 +273,7 @@ const Transactions = () => {
                     // console.log(row);
                   }} 
                     className="filled-in" type="checkbox" id={row.values.key} />
-                  <span></span>
+                  <span style={{padding: 10}} ></span>
                 </label>
               ),
             },
@@ -309,15 +309,7 @@ const Transactions = () => {
                   {headerGroup.headers.length ?
                   <>
                     <th></th>
-                    <th style={{width: 60, paddingTop: 15}} > No.</th>
-                      {/* <th {...headerGroup.headers[1].getHeaderProps(
-                      headerGroup.headers[1].getSortByToggleProps()
-                      )}> 
-                      {headerGroup.headers[1].render('Header')}
-                        <span> {headerGroup.headers[1].isSorted ? (headerGroup.headers[1].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
-                        <div>{headerGroup.headers[1].canFilter ? headerGroup.headers[1].render('Filter') : null}</div>
-                      </th> */}
-
+                    <th style={{width: 60, paddingTop: 15}} ></th>
                     <th {...headerGroup.headers[2].getHeaderProps(
                     // headerGroup.headers[2].getSortByToggleProps()
                      )}> {headerGroup.headers[2].render('Header')}
@@ -377,7 +369,7 @@ const Transactions = () => {
                   // console.log(row.);
                   return (
                     <tr {...row.getRowProps()} >
-                      <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
+                      <td style={{paddingTop: 15}} {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
                       <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
                       <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>
                       <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>      
