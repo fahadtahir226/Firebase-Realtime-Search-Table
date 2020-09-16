@@ -141,6 +141,7 @@ const IndeterminateCheckbox = React.forwardRef(
 const Transactions = () => {
   const [status, setStatus] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [rowsCount, setRowsCount] = useState(0);
   const [data, setdata] = useState([]);
 
 	useEffect(() => {
@@ -152,7 +153,8 @@ const Transactions = () => {
     let records = []; 
     RDB.ref('Transactions').once('value')
     .then( res => {
-      let entries = res.val();
+      let entries = res.val(), items = res.numChildren();
+      
       Object.keys(entries).forEach(key =>{
         records.unshift({ 
           name: entries[key].name,
@@ -164,6 +166,7 @@ const Transactions = () => {
           phoneNumber: entries[key].phoneNumber,
           status: entries[key].status ? 'VERIFIED' : 'PENDING',
           key: key || '-',
+          itemNo: items--,
         })
       })
       setStatus(true);
@@ -187,6 +190,7 @@ const Transactions = () => {
   const defaultColumn = React.useMemo(() => ({Filter: DefaultColumnFilter}),[])
   
   const columns = React.useMemo(() => [
+    { Header: '', accessor: 'itemNo', disableFilters: false, sortable: false },
     { Header: 'NAME', accessor: 'name' },
     { Header: 'AMOUNT', accessor: 'amount', Filter: NumberColumnFilter, filter: filterExact },
     { Header: 'DISCOUNT', accessor: 'discountedAmount', Filter: NumberColumnFilter, filter: filterExact},
@@ -199,7 +203,7 @@ const Transactions = () => {
     ],[]) 
 
   const deleteItem = key => {
-    console.log(key);
+    console.log(key, ' Deleting!!!');
     RDB.ref(`Transactions/${key}`).remove()
     .then(() => {
       alert('Item Deleted!');
@@ -214,6 +218,7 @@ const Transactions = () => {
     Promise.all(selectedRows.map(row => RDB.ref(`Transactions/${row}`).remove()))
     .then(() => {
       alert('Items Deleted!');  
+      setRowsCount(0);
       setSelectedRows([])
       setInterval(() => {
         window.location.reload()
@@ -262,6 +267,7 @@ const Transactions = () => {
                         ids.splice(index, 1);
                       }
                     }
+                    setRowsCount(ids.length);
                     setSelectedRows(ids)
                     console.log(ids);
                     // console.log(row);
@@ -284,9 +290,10 @@ const Transactions = () => {
 			  			RESULTS
 			  		</h5>
 			  		<div>
-              <button style={{marginRight: 5}} disabled={!status} className='btn red' onClick={() => deleteAll()}>
-			  				<i className='material-icons right' style={{marginLeft: 0}}>delete</i>
-			  				<span className='hide-on-med-and-down' style={{marginRight: 10}}>Delete All</span>
+              <button style={{marginRight: 5}} disabled={!rowsCount || !status} className='btn red' onClick={() => deleteAll()}>
+			  				<i className='material-icons right' style={{marginLeft: 0}}>delete </i>
+                <span className='hide-on-med-and-down' style={{marginRight: 10}}>Delete All</span>
+                <span>{rowsCount}</span>
 			  			</button>
               <button disabled={data.length < 1 || !status} className='btn' onClick={() => exportTableToCSV('Transactions.csv', rows, ['Status', 'Name', 'Amount', 'Discounted Amount', 'Order Date', 'Payment', 'Phone Number', 'Transaction Id'])}>
 			  				<i className='material-icons right' style={{marginLeft: 0}}>file_download</i>
@@ -301,19 +308,16 @@ const Transactions = () => {
                 <tr {...headerGroup.getHeaderGroupProps()} >
                   {headerGroup.headers.length ?
                   <>
-                    <th {...headerGroup.headers[0].getHeaderProps(
-                    headerGroup.headers[0].getSortByToggleProps()
-                     )}> 
-                     {headerGroup.headers[0].render('Header')}
-                      <span> {headerGroup.headers[0].isSorted ? (headerGroup.headers[0].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
-                      <div>{headerGroup.headers[0].canFilter ? headerGroup.headers[0].render('Filter') : null}</div>
-                    </th>
-                    <th {...headerGroup.headers[1].getHeaderProps(
-                    // headerGroup.headers[1].getSortByToggleProps()
-                     )}> {headerGroup.headers[1].render('Header')}
-                      <span> {headerGroup.headers[1].isSorted ? (headerGroup.headers[1].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
-                      <div>{headerGroup.headers[1].canFilter ? headerGroup.headers[1].render('Filter') : null}</div>
-                    </th>
+                    <th></th>
+                    <th style={{width: 60, paddingTop: 15}} > No.</th>
+                      {/* <th {...headerGroup.headers[1].getHeaderProps(
+                      headerGroup.headers[1].getSortByToggleProps()
+                      )}> 
+                      {headerGroup.headers[1].render('Header')}
+                        <span> {headerGroup.headers[1].isSorted ? (headerGroup.headers[1].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                        <div>{headerGroup.headers[1].canFilter ? headerGroup.headers[1].render('Filter') : null}</div>
+                      </th> */}
+
                     <th {...headerGroup.headers[2].getHeaderProps(
                     // headerGroup.headers[2].getSortByToggleProps()
                      )}> {headerGroup.headers[2].render('Header')}
@@ -326,31 +330,37 @@ const Transactions = () => {
                       <span> {headerGroup.headers[3].isSorted ? (headerGroup.headers[3].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       <div>{headerGroup.headers[3].canFilter ? headerGroup.headers[3].render('Filter') : null}</div>
                     </th>
-                    <th colSpan='2' {...headerGroup.headers[4].getHeaderProps(
+                    <th {...headerGroup.headers[4].getHeaderProps(
                     // headerGroup.headers[4].getSortByToggleProps()
                      )}> {headerGroup.headers[4].render('Header')}
                       <span> {headerGroup.headers[4].isSorted ? (headerGroup.headers[4].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       <div>{headerGroup.headers[4].canFilter ? headerGroup.headers[4].render('Filter') : null}</div>
                     </th>
-                    <th {...headerGroup.headers[5].getHeaderProps(
+                    <th colSpan='2' {...headerGroup.headers[5].getHeaderProps(
                     // headerGroup.headers[5].getSortByToggleProps()
                      )}> {headerGroup.headers[5].render('Header')}
                       <span> {headerGroup.headers[5].isSorted ? (headerGroup.headers[5].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       <div>{headerGroup.headers[5].canFilter ? headerGroup.headers[5].render('Filter') : null}</div>
                     </th>
-                    <th></th>
-                    <th style={{width: 120}} {...headerGroup.headers[6].getHeaderProps(
+                    <th {...headerGroup.headers[6].getHeaderProps(
                     // headerGroup.headers[6].getSortByToggleProps()
                      )}> {headerGroup.headers[6].render('Header')}
                       <span> {headerGroup.headers[6].isSorted ? (headerGroup.headers[6].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       <div>{headerGroup.headers[6].canFilter ? headerGroup.headers[6].render('Filter') : null}</div>
                     </th>
-
+                    <th></th>
                     <th style={{width: 120}} {...headerGroup.headers[7].getHeaderProps(
                     // headerGroup.headers[7].getSortByToggleProps()
                      )}> {headerGroup.headers[7].render('Header')}
                       <span> {headerGroup.headers[7].isSorted ? (headerGroup.headers[7].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       <div>{headerGroup.headers[7].canFilter ? headerGroup.headers[7].render('Filter') : null}</div>
+                    </th>
+
+                    <th style={{width: 120}} {...headerGroup.headers[8].getHeaderProps(
+                    // headerGroup.headers[8].getSortByToggleProps()
+                     )}> {headerGroup.headers[8].render('Header')}
+                      <span> {headerGroup.headers[8].isSorted ? (headerGroup.headers[8].isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      <div>{headerGroup.headers[8].canFilter ? headerGroup.headers[8].render('Filter') : null}</div>
                     </th>
 
                     <th></th>
@@ -369,23 +379,24 @@ const Transactions = () => {
                     <tr {...row.getRowProps()} >
                       <td {...row.cells[0].getCellProps()}>{row.cells[0].render('Cell')}</td>
                       <td {...row.cells[1].getCellProps()}>{row.cells[1].render('Cell')}</td>
-                      <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>      
-                      <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>   
-                      <td {...row.cells[4].getCellProps()}>
-                        {row.cells[4].render('Cell')}  {' '}                      
-                        {row.cells[9].render('Cell')}
+                      <td {...row.cells[2].getCellProps()}>{row.cells[2].render('Cell')}</td>
+                      <td {...row.cells[3].getCellProps()}>{row.cells[3].render('Cell')}</td>      
+                      <td {...row.cells[4].getCellProps()}>{row.cells[4].render('Cell')}</td>   
+                      <td {...row.cells[5].getCellProps()}>
+                        {row.cells[5].render('Cell')}  {' '}                      
+                        {row.cells[10].render('Cell')}
                       </td>
-                      <td colSpan='2' {...row.cells[5].getCellProps()}>{row.cells[5].render('Cell')}</td>
-                      <td {...row.cells[6].getCellProps()}>{row.cells[6].render('Cell')}</td>
-                      <td {...row.cells[7].getCellProps()}>
-                      {row.cells[7].value === 'VERIFIED' ?
-                        <span className="new badge green" data-badge-caption={row.cells[7].value}></span> :
-                        <span className="new badge red" data-badge-caption={row.cells[7].value}></span>
+                      <td colSpan='2' {...row.cells[6].getCellProps()}>{row.cells[6].render('Cell')}</td>
+                      <td {...row.cells[7].getCellProps()}>{row.cells[7].render('Cell')}</td>
+                      <td {...row.cells[8].getCellProps()}>
+                      {row.cells[8].value === 'VERIFIED' ?
+                        <span className="new badge green" data-badge-caption={row.cells[8].value}></span> :
+                        <span className="new badge red" data-badge-caption={row.cells[8].value}></span>
                       }  
                       </td>
 
-                      <td {...row.cells[8].getCellProps()}>
-                        {row.cells[8].value !== '-' ? <i className='material-icons' onClick={()=> deleteItem(row.values.key) } >delete</i> : ""}
+                      <td {...row.cells[9].getCellProps()}>
+                        {row.cells[9].value !== '-' ? <i className='material-icons' onClick={()=> deleteItem(row.values.key) } >delete</i> : ""}
                       </td>
                   </tr>
                 )}

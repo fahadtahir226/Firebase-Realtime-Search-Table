@@ -45,11 +45,6 @@ class SignIn extends Component {
                   <i className="material-icons right">send</i>
                 </button>
               </div>
-              <div className='row' style={{marginTop: 50}} >
-                <div className='col s2 m3 l3' style={{paddingRight: 0}}><div className="divider" style={{marginTop: 10}} ></div></div>
-                <div className='col s8 m6 l6' style={{paddingLeft: 5, paddingRight: 5, color: 'dimgray'}} >OR LOGIN WITH YOUR SOCIAL MEDIA</div> 
-                <div className='col s2 m3 l3' style={{paddingLeft: 0}} ><div className="divider" style={{marginTop: 10}} ></div></div>
-              </div>
               <div className='row' >Don't have an account? <Link to='sign-up' >Sign Up</Link> here</div>
 
            </form>

@@ -13,7 +13,7 @@ const Navbar = () => {
     <div>
        <nav className='z-depth-0' >
         <div className="nav-wrapper white" style={{marginBottom: 0,}}>
-          <a href="#!" className="brand-logo hide-on-med-and-down black-text"><img alt="" style={{padding: 10}} src={logo} /></a>
+          <a href="#!" className="brand-logo hide-on-med-and-down black-text">KINASH</a>
           <ul id="nav" className="tabs tabs-transparent" style={{height: 64}}>
             <li style={{ height: 64 }} className="tab right"><a href="#transactions" className="active" style={{paddingTop: 10, color: 'black', background: 'white'}} >Transactions</a></li>
             <li style={{ height: 64 }} className="tab right"><a href="#users"  style={{paddingTop: 10, color: 'black', background: 'white'}} >Users</a></li>

@@ -7,6 +7,15 @@ html {
   pointer-events: none;
 }
 
+/* @font-face {
+  font-family: 'veganFont';
+  src: url('./vegan-style-font/VeganStylePersonalUse-5Y58.ttf')
+}
+
+.brand-logo{
+  font-family: 'veganFont'
+} */
+
 .tab a.active {
   color: #00bfa5 !important;
 }

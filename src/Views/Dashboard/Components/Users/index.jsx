@@ -180,7 +180,7 @@ const Users = () => {
 			  			</button>
 			  		</div>
 			  	</div>
-          <div style={{overflow: 'scroll'}} >
+          <div style={{overflowX: 'scroll'}} >
           <table className='highlight' {...getTableProps()} id="myUserTable" style={{display: status ? null: 'none'}} >
             <thead>
               {headerGroups.map(headerGroup => (
